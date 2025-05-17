@@ -166,35 +166,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       isParent: false
     });
     
-    // Create or get the guide/helper friend if it doesn't exist
-    let guideFriend = await storage.getUserByUsername('kidschat_guide');
-    
-    if (!guideFriend) {
-      // Create a guide friend for all kids
-      guideFriend = await storage.createUser({
-        username: 'kidschat_guide',
-        password: 'guide_password', // In production, use a secure generated password
-        name: 'KidsChat Guide',
-        isParent: false,
-        parentId: null, // System-owned account
-        status: "I'm here to help you use the app!",
-        avatarColor: '#4CAF50' // Green
-      });
-    }
-    
-    // Automatically create an approved friend connection between the child and guide
-    await storage.createFriendRequest({
-      userId: guideFriend.id,
-      friendId: newChild.id,
-      status: 'approved' // Auto-approve this connection
-    });
-    
-    // Also create a welcome message
-    await storage.createMessage({
-      senderId: guideFriend.id,
-      receiverId: newChild.id,
-      content: `Welcome to KidsChat, ${newChild.name}! I'm your guide. You can chat with me anytime if you have questions about using the app. Have fun chatting with your friends! 😊`
-    });
+    // Add pre-saved friends for this child account
+    await addPreSavedFriendsForChild(newChild.id);
     
     // Don't send password in response
     const { password, ...childWithoutPassword } = newChild;
