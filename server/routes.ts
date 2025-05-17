@@ -7,6 +7,7 @@ import {
   updateProfileSchema, insertMessageSchema, insertFriendSchema,
   friendRequestResponseSchema, messageReviewSchema
 } from "@shared/schema";
+import { addPreSavedFriendsForChild } from "./preSavedFriends";
 
 // Keep track of active connections
 const activeConnections = new Map<number, WebSocket>();
