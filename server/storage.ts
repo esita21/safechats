@@ -1,7 +1,8 @@
 import { 
-  users, messages, friends, notifications,
+  users, messages, friends, notifications, friendRequestLinks,
   type User, type InsertUser, type Message, type InsertMessage,
-  type Friend, type InsertFriend, type Notification, type InsertNotification
+  type Friend, type InsertFriend, type Notification, type InsertNotification,
+  type FriendRequestLink, type InsertFriendRequestLink
 } from "@shared/schema";
 
 export interface IStorage {
@@ -27,6 +28,9 @@ export interface IStorage {
   getPendingFriendRequests(parentId: number): Promise<Friend[]>;
   updateFriendRequest(id: number, updates: Partial<Friend>): Promise<Friend | undefined>;
   getFriendsByUserId(userId: number): Promise<User[]>;
+  createFriendRequestLink(userId: number, token: string): Promise<FriendRequestLink>;
+  getFriendRequestLinkByToken(token: string): Promise<FriendRequestLink | undefined>;
+  markFriendRequestLinkAsUsed(id: number): Promise<FriendRequestLink | undefined>;
   
   // Notification operations
   createNotification(notification: InsertNotification): Promise<Notification>;
@@ -39,20 +43,24 @@ export class MemStorage implements IStorage {
   private messages: Map<number, Message>;
   private friends: Map<number, Friend>;
   private notifications: Map<number, Notification>;
+  private friendRequestLinks: Map<number, FriendRequestLink>;
   private userIdCounter: number;
   private messageIdCounter: number;
   private friendIdCounter: number;
   private notificationIdCounter: number;
+  private friendRequestLinkIdCounter: number;
 
   constructor() {
     this.users = new Map();
     this.messages = new Map();
     this.friends = new Map();
     this.notifications = new Map();
+    this.friendRequestLinks = new Map();
     this.userIdCounter = 1;
     this.messageIdCounter = 1;
     this.friendIdCounter = 1;
     this.notificationIdCounter = 1;
+    this.friendRequestLinkIdCounter = 1;
   }
 
   // User operations
@@ -237,6 +245,42 @@ export class MemStorage implements IStorage {
     const updatedNotification = { ...notification, isRead: true };
     this.notifications.set(id, updatedNotification);
     return updatedNotification;
+  }
+  
+  // Friend request link operations
+  async createFriendRequestLink(userId: number, token: string): Promise<FriendRequestLink> {
+    const id = this.friendRequestLinkIdCounter++;
+    const now = new Date();
+    
+    // Set expiration to 7 days from now
+    const expiresAt = new Date(now);
+    expiresAt.setDate(expiresAt.getDate() + 7);
+    
+    const linkData: FriendRequestLink = {
+      id,
+      userId,
+      token,
+      isUsed: false,
+      createdAt: now,
+      expiresAt
+    };
+    
+    this.friendRequestLinks.set(id, linkData);
+    return linkData;
+  }
+  
+  async getFriendRequestLinkByToken(token: string): Promise<FriendRequestLink | undefined> {
+    return Array.from(this.friendRequestLinks.values())
+      .find(link => link.token === token && !link.isUsed && link.expiresAt > new Date());
+  }
+  
+  async markFriendRequestLinkAsUsed(id: number): Promise<FriendRequestLink | undefined> {
+    const link = this.friendRequestLinks.get(id);
+    if (!link) return undefined;
+    
+    const updatedLink = { ...link, isUsed: true };
+    this.friendRequestLinks.set(id, updatedLink);
+    return updatedLink;
   }
 }
 

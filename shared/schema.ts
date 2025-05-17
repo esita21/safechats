@@ -44,11 +44,26 @@ export const notifications = pgTable("notifications", {
   timestamp: timestamp("timestamp").notNull().defaultNow(),
 });
 
+// Friend request links
+export const friendRequestLinks = pgTable("friend_request_links", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  token: text("token").notNull().unique(),
+  isUsed: boolean("is_used").default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
+});
+
 // Schemas for inserts
 export const insertUserSchema = createInsertSchema(users).omit({ id: true });
 export const insertMessageSchema = createInsertSchema(messages).omit({ id: true, timestamp: true });
 export const insertFriendSchema = createInsertSchema(friends).omit({ id: true, requestTime: true });
 export const insertNotificationSchema = createInsertSchema(notifications).omit({ id: true, timestamp: true });
+export const insertFriendRequestLinkSchema = createInsertSchema(friendRequestLinks).omit({ 
+  id: true, 
+  createdAt: true, 
+  isUsed: true 
+});
 
 // Login schema
 export const loginSchema = z.object({
@@ -87,6 +102,8 @@ export type Friend = typeof friends.$inferSelect;
 export type InsertFriend = z.infer<typeof insertFriendSchema>;
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type FriendRequestLink = typeof friendRequestLinks.$inferSelect;
+export type InsertFriendRequestLink = z.infer<typeof insertFriendRequestLinkSchema>;
 export type CreateChild = z.infer<typeof createChildSchema>;
 export type UpdateProfile = z.infer<typeof updateProfileSchema>;
 export type FriendRequestResponse = z.infer<typeof friendRequestResponseSchema>;

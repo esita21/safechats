@@ -136,6 +136,70 @@ export default function ChildDashboard() {
     }
   };
   
+  const [friendRequestLink, setFriendRequestLink] = useState<string | null>(null);
+  const [isGeneratingLink, setIsGeneratingLink] = useState(false);
+  
+  const generateFriendRequestLink = async () => {
+    if (!user) return;
+    
+    setIsGeneratingLink(true);
+    
+    try {
+      const response = await fetch('/api/friend-request-links', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId: user.id
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message);
+      }
+      
+      const linkData = await response.json();
+      const baseUrl = window.location.origin;
+      const fullLink = `${baseUrl}${linkData.requestLink}`;
+      
+      setFriendRequestLink(fullLink);
+      
+      toast({
+        title: "Friend request link created!",
+        description: "Share this link with your friend to send them a friend request.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Something went wrong, please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeneratingLink(false);
+    }
+  };
+  
+  const copyToClipboard = () => {
+    if (!friendRequestLink) return;
+    
+    navigator.clipboard.writeText(friendRequestLink)
+      .then(() => {
+        toast({
+          title: "Copied!",
+          description: "Friend request link copied to clipboard",
+        });
+      })
+      .catch(() => {
+        toast({
+          title: "Error",
+          description: "Failed to copy link to clipboard",
+          variant: "destructive"
+        });
+      });
+  };
+  
   const markNotificationAsRead = async (notificationId: number) => {
     try {
       await fetch(`/api/notifications/${notificationId}/read`, {

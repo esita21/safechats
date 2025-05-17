@@ -318,6 +318,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(201).json(friendRequest);
   });
   
+  // Generate a friend request link with a token
+  app.post('/api/friend-request-links', async (req: Request, res: Response) => {
+    const { userId } = req.body;
+    
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
+    
+    // Check if user exists and is a child
+    const user = await storage.getUser(parseInt(userId));
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    if (user.isParent) {
+      return res.status(400).json({ message: 'Only children can generate friend request links' });
+    }
+    
+    // Generate a request token (simple version - in production would use JWT or similar)
+    const requestToken = Buffer.from(`${userId}-${Date.now()}`).toString('base64');
+    
+    // Store the token (in a real app, we'd use a dedicated table for this)
+    const linkData = await storage.createFriendRequestLink(userId, requestToken);
+    
+    res.status(201).json({
+      requestToken,
+      userId,
+      requestLink: `/friend-request?token=${requestToken}` 
+    });
+  });
+  
+  // Validate a friend request token
+  app.get('/api/friend-request-links/:token', async (req: Request, res: Response) => {
+    const { token } = req.params;
+    
+    if (!token) {
+      return res.status(400).json({ message: 'Token is required' });
+    }
+    
+    // Get the token data
+    const linkData = await storage.getFriendRequestLinkByToken(token);
+    
+    if (!linkData) {
+      return res.status(404).json({ message: 'Invalid or expired friend request link' });
+    }
+    
+    // Get the user who created the link
+    const user = await storage.getUser(linkData.userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    // Return the user info (without sensitive data)
+    const { password, ...userWithoutPassword } = user;
+    
+    res.json({
+      tokenData: linkData,
+      user: userWithoutPassword
+    });
+  });
+  
   app.get('/api/users/:userId/friends', async (req: Request, res: Response) => {
     const userId = parseInt(req.params.userId);
     if (isNaN(userId)) {
