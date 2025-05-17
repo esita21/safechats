@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "./lib/auth";
 import { MessageProvider } from "./lib/MessageContext";
+import AuthRedirect from "@/components/AuthRedirect";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
@@ -55,6 +56,7 @@ function App() {
         <MessageProvider>
           <TooltipProvider>
             <Toaster />
+            <AuthRedirect />
             <Router />
           </TooltipProvider>
         </MessageProvider>
