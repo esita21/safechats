@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 20 14.3% 4.1%;
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 44.7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14.3% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 14.3% 4.1%;
+  --border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  
+  /* Kid-friendly bright primary blue */
+  --primary: 210 100% 56%;
+  --primary-foreground: 210 40% 98%;
+  
+  /* Pastel secondary colors */
+  --secondary: 152 66% 67%;
+  --secondary-foreground: 0 0% 12%;
+  
+  --accent: 270 90% 73%;
+  --accent-foreground: 0 0% 12%;
+  
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --ring: 20 14.3% 4.1%;
+  --radius: 0.8rem; /* Increased radius for kid-friendly rounded corners */
+  
+  /* Chart colors */
+  --chart-1: 210 100% 56%;
+  --chart-2: 152 66% 67%;
+  --chart-3: 270 90% 73%;
+  --chart-4: 30 96% 62%;
+  --chart-5: 325 77% 56%;
+  
+  /* Sidebar colors (for parent dashboard) */
+  --sidebar-background: 215 25% 27%;
+  --sidebar-foreground: 0 0% 100%;
+  --sidebar-primary: 210 100% 56%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 270 90% 73%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-border: 215 20% 40%;
+  --sidebar-ring: 215 25% 65%;
+}
+
+.dark {
+  --background: 220 10% 10%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  
+  /* Kid-friendly colors in dark mode */
+  --primary: 210 100% 56%;
+  --primary-foreground: 210 40% 98%;
+  
+  --secondary: 152 54% 50%;
+  --secondary-foreground: 0 0% 98%;
+  
+  --accent: 270 76% 60%;
+  --accent-foreground: 0 0% 98%;
+  
+  --destructive: 0 62.8% 40.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 4.9% 83.9%;
+  --radius: 0.8rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+/* Additional kid-friendly styles */
+.kid-bubble {
+  @apply rounded-2xl py-2 px-4 max-w-[85%];
+}
+
+.kid-bubble-sent {
+  @apply bg-primary text-primary-foreground rounded-tr-none;
+}
+
+.kid-bubble-received {
+  @apply bg-gray-100 text-gray-800 rounded-tl-none;
+}
+
+.kid-gradient-bg {
+  @apply bg-gradient-to-b from-blue-50 to-purple-50;
+}
+
+/* Animate emoji */
+.wave-emoji {
+  display: inline-block;
+  animation: wave 1.8s infinite;
+  transform-origin: 70% 70%;
+}
+
+@keyframes wave {
+  0% { transform: rotate(0deg); }
+  10% { transform: rotate(14deg); }
+  20% { transform: rotate(-8deg); }
+  30% { transform: rotate(14deg); }
+  40% { transform: rotate(-4deg); }
+  50% { transform: rotate(10deg); }
+  60% { transform: rotate(0deg); }
+  100% { transform: rotate(0deg); }
+}
