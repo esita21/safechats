@@ -284,5 +284,19 @@ export class MemStorage implements IStorage {
   }
 }
 
-// Use in-memory storage implementation
-export const storage = new MemStorage();
+// Import database storage
+import { DatabaseStorage } from './database-storage';
+
+// Try to use database storage, but fall back to memory storage if there's an issue
+let storage: IStorage;
+
+try {
+  storage = new DatabaseStorage();
+  console.log('Using PostgreSQL database storage');
+} catch (error) {
+  console.error('Error initializing database storage:', error);
+  console.log('Falling back to in-memory storage');
+  storage = new MemStorage();
+}
+
+export { storage };

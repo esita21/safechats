@@ -75,24 +75,24 @@ export default function Login() {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50 flex flex-col justify-center items-center p-4">
+    <div className="cute-auth-container">
       <div className="w-full max-w-md">
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-primary mb-2">KidChat</h1>
-          <p className="text-gray-600">Safe messaging for kids</p>
+        <div className="text-center mb-6 bounce-in">
+          <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-md">KidChat</h1>
+          <p className="text-white/90 font-medium">Safe messaging for kids</p>
         </div>
         
         <Tabs defaultValue="parent" onValueChange={(value) => setIsParentLogin(value === 'parent')}>
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="parent">I'm a Parent</TabsTrigger>
-            <TabsTrigger value="child">I'm a Kid</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-6 rounded-full cute-button">
+            <TabsTrigger value="parent" className="rounded-full">I'm a Parent</TabsTrigger>
+            <TabsTrigger value="child" className="rounded-full">I'm a Kid</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="parent">
-            <Card>
+          <TabsContent value="parent" className="slide-in">
+            <Card className="cute-auth-card border-none">
               <CardHeader>
-                <CardTitle>Parent Login</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-2xl text-center text-primary">Parent Login</CardTitle>
+                <CardDescription className="text-center">
                   Sign in to monitor your child's chats and approve friend requests.
                 </CardDescription>
               </CardHeader>
@@ -106,11 +106,12 @@ export default function Login() {
                   )}
                   
                   <div className="space-y-2">
-                    <Label htmlFor="parent-username">Username</Label>
+                    <Label htmlFor="parent-username" className="font-medium">Username</Label>
                     <Input
                       id="parent-username"
                       {...register('username')}
                       placeholder="Enter your username"
+                      className="cute-input"
                     />
                     {errors.username && (
                       <p className="text-sm text-red-500">{errors.username.message}</p>
@@ -118,12 +119,13 @@ export default function Login() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="parent-password">Password</Label>
+                    <Label htmlFor="parent-password" className="font-medium">Password</Label>
                     <Input
                       id="parent-password"
                       type="password"
                       {...register('password')}
                       placeholder="Enter your password"
+                      className="cute-input"
                     />
                     {errors.password && (
                       <p className="text-sm text-red-500">{errors.password.message}</p>
@@ -131,14 +133,14 @@ export default function Login() {
                   </div>
                 </CardContent>
                 
-                <CardFooter className="flex flex-col space-y-2">
-                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                <CardFooter className="flex flex-col space-y-3">
+                  <Button type="submit" className="w-full rounded-full cute-button shadow-md" disabled={isSubmitting}>
                     {isSubmitting ? 'Signing in...' : 'Sign In'}
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full"
+                    className="w-full rounded-full cute-button shadow-sm"
                     onClick={() => setLocation('/register')}
                   >
                     Create Parent Account
@@ -148,11 +150,11 @@ export default function Login() {
             </Card>
           </TabsContent>
           
-          <TabsContent value="child">
-            <Card>
+          <TabsContent value="child" className="slide-in">
+            <Card className="cute-auth-card border-none">
               <CardHeader>
-                <CardTitle>Kid Login</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-2xl text-center text-primary">Kid Login</CardTitle>
+                <CardDescription className="text-center">
                   Sign in to chat with your friends!
                 </CardDescription>
               </CardHeader>
@@ -166,11 +168,12 @@ export default function Login() {
                   )}
                   
                   <div className="space-y-2">
-                    <Label htmlFor="child-username">Username</Label>
+                    <Label htmlFor="child-username" className="font-medium">Username</Label>
                     <Input
                       id="child-username"
                       {...register('username')}
                       placeholder="Enter your username"
+                      className="cute-input"
                     />
                     {errors.username && (
                       <p className="text-sm text-red-500">{errors.username.message}</p>
@@ -178,12 +181,13 @@ export default function Login() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="child-password">Password</Label>
+                    <Label htmlFor="child-password" className="font-medium">Password</Label>
                     <Input
                       id="child-password"
                       type="password"
                       {...register('password')}
                       placeholder="Enter your password"
+                      className="cute-input"
                     />
                     {errors.password && (
                       <p className="text-sm text-red-500">{errors.password.message}</p>
@@ -192,7 +196,7 @@ export default function Login() {
                 </CardContent>
                 
                 <CardFooter>
-                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  <Button type="submit" className="w-full rounded-full cute-button shadow-md" disabled={isSubmitting}>
                     {isSubmitting ? 'Signing in...' : 'Sign In'}
                   </Button>
                 </CardFooter>
