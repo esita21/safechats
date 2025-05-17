@@ -107,8 +107,10 @@ export class DatabaseStorage implements IStorage {
             eq(messages.isReviewed, false)
           ),
           or(
-            sql`${messages.senderId} = ANY(${childIds})`,
-            sql`${messages.receiverId} = ANY(${childIds})`
+            ...childIds.map(id => or(
+              eq(messages.senderId, id),
+              eq(messages.receiverId, id)
+            ))
           ),
           eq(messages.isDeleted, false)
         )
@@ -166,18 +168,28 @@ export class DatabaseStorage implements IStorage {
     if (childIds.length === 0) return [];
     
     // Get all pending friend requests for this parent's children
-    return db
-      .select()
-      .from(friends)
-      .where(
-        and(
-          eq(friends.status, 'pending'),
-          or(
-            sql`${friends.userId} = ANY(${childIds})`,
-            sql`${friends.friendId} = ANY(${childIds})`
+    // Use a simpler approach with individual OR conditions
+    const requests: Friend[] = [];
+    
+    // Process each child separately to avoid array handling issues
+    for (const childId of childIds) {
+      const childRequests = await db
+        .select()
+        .from(friends)
+        .where(
+          and(
+            eq(friends.status, 'pending'),
+            or(
+              eq(friends.userId, childId),
+              eq(friends.friendId, childId)
+            )
           )
-        )
-      );
+        );
+      
+      requests.push(...childRequests);
+    }
+    
+    return requests;
   }
 
   async updateFriendRequest(id: number, updates: Partial<Friend>): Promise<Friend | undefined> {
@@ -212,10 +224,17 @@ export class DatabaseStorage implements IStorage {
     );
     
     // Get the user details for all friends
+    if (friendIds.length === 0) return [];
+    
+    // Use individual OR conditions instead of the ANY operator
     return db
       .select()
       .from(users)
-      .where(sql`${users.id} = ANY(${friendIds})`);
+      .where(
+        or(
+          ...friendIds.map(id => eq(users.id, id))
+        )
+      );
   }
 
   // Friend request link operations

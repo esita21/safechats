@@ -37,79 +37,8 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Initialize database tables if they don't exist
-  try {
-    console.log('Setting up database tables...');
-    const { db } = await import('./db');
-    const { sql } = await import('drizzle-orm');
-    
-    // Create users table
-    await db.execute(sql`
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        username TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL,
-        is_parent BOOLEAN NOT NULL DEFAULT FALSE,
-        parent_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-        name TEXT NOT NULL,
-        status TEXT,
-        avatar_color TEXT
-      )
-    `);
-    
-    // Create messages table
-    await db.execute(sql`
-      CREATE TABLE IF NOT EXISTS messages (
-        id SERIAL PRIMARY KEY,
-        sender_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        receiver_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        content TEXT NOT NULL,
-        timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
-        is_deleted BOOLEAN DEFAULT FALSE,
-        is_filtered BOOLEAN DEFAULT FALSE,
-        is_reviewed BOOLEAN DEFAULT FALSE
-      )
-    `);
-    
-    // Create friends table
-    await db.execute(sql`
-      CREATE TABLE IF NOT EXISTS friends (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        friend_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        status TEXT NOT NULL DEFAULT 'pending',
-        request_time TIMESTAMP NOT NULL DEFAULT NOW()
-      )
-    `);
-    
-    // Create notifications table
-    await db.execute(sql`
-      CREATE TABLE IF NOT EXISTS notifications (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        message TEXT NOT NULL,
-        is_read BOOLEAN DEFAULT FALSE,
-        timestamp TIMESTAMP NOT NULL DEFAULT NOW()
-      )
-    `);
-    
-    // Create friend_request_links table
-    await db.execute(sql`
-      CREATE TABLE IF NOT EXISTS friend_request_links (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        token TEXT NOT NULL UNIQUE,
-        is_used BOOLEAN DEFAULT FALSE,
-        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-        expires_at TIMESTAMP NOT NULL
-      )
-    `);
-    
-    console.log('Database tables setup complete!');
-  } catch (error) {
-    console.error('Database setup error:', error);
-    console.log('Continuing with in-memory storage...');
-  }
+  // Using in-memory storage for simplicity and reliability
+  console.log('Using in-memory storage for data persistence');
 
   const server = await registerRoutes(app);
 
