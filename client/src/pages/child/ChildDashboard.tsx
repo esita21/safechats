@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import FriendsList from '@/components/FriendsList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MessageCircle, UserPlus, Bell } from 'lucide-react';
+import { MessageCircle, UserPlus, Bell, Link as LinkIcon, ClipboardCopy, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
@@ -309,12 +309,55 @@ export default function ChildDashboard() {
                         onClick={handleSendFriendRequest}
                         disabled={isAddingFriend}
                       >
-                        {isAddingFriend ? 'Sending...' : 'Send Request'}
+                        {isAddingFriend ? 
+                          <Loader2 className="h-4 w-4 animate-spin mr-1" /> : 
+                          <UserPlus className="h-4 w-4 mr-1" />
+                        }
+                        Send Request
                       </Button>
                     </div>
                     <p className="text-sm text-gray-500">
                       Remember, your parent will need to approve all friend requests!
                     </p>
+                    
+                    <div className="border-t pt-4 mt-4">
+                      <h3 className="text-md font-medium mb-2">Share Friend Request Link</h3>
+                      <p className="text-sm text-gray-500 mb-4">
+                        Generate a link to share with friends who want to add you.
+                      </p>
+                      
+                      {!friendRequestLink ? (
+                        <Button 
+                          onClick={generateFriendRequestLink}
+                          disabled={isGeneratingLink}
+                          variant="outline"
+                          className="w-full"
+                        >
+                          {isGeneratingLink ? 
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" /> :
+                            <LinkIcon className="h-4 w-4 mr-2" />
+                          }
+                          Generate Friend Link
+                        </Button>
+                      ) : (
+                        <div className="space-y-2">
+                          <div className="flex gap-2">
+                            <Input value={friendRequestLink} readOnly />
+                            <Button onClick={copyToClipboard} size="icon">
+                              <ClipboardCopy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <Button
+                            onClick={() => setFriendRequestLink(null)}
+                            variant="secondary"
+                            size="sm"
+                            className="w-full"
+                          >
+                            Generate New Link
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </TabsContent>
               </Tabs>

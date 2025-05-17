@@ -8,6 +8,7 @@ import { MessageProvider } from "./lib/MessageContext";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
+import FriendRequest from "@/pages/FriendRequest";
 
 // Parent routes
 import ParentDashboard from "@/pages/parent/ParentDashboard";
@@ -26,6 +27,9 @@ function Router() {
       {/* Auth routes */}
       <Route path="/" component={Login} />
       <Route path="/register" component={Register} />
+      
+      {/* Friend Request */}
+      <Route path="/friend-request" component={FriendRequest} />
       
       {/* Parent routes */}
       <Route path="/parent/dashboard" component={ParentDashboard} />
