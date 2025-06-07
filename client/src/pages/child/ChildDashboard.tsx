@@ -67,8 +67,8 @@ export default function ChildDashboard() {
     
     try {
       // First find the user by username
-      const userResponse = await fetch(`/api/users/by-username?username=${encodeURIComponent(friendUsername)}`);
-      
+      const userResponse = await fetch(`/api/users/by-username/${encodeURIComponent(friendUsername)}`);
+      console.log("User response:", userResponse);
       if (!userResponse.ok) {
         // If username doesn't exist, show error
         toast({

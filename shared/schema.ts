@@ -4,7 +4,7 @@ import { z } from "zod";
 
 // User table for both parents and children
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+  id: serial("id").primaryKey() .$type<number>(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   isParent: boolean("is_parent").notNull().default(false),
@@ -15,7 +15,7 @@ export const users = pgTable("users", {
 });
 
 // Chat messages
-export const messages = pgTable("messages", {
+export const  messages = pgTable("messages", {
   id: serial("id").primaryKey(),
   senderId: integer("sender_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   receiverId: integer("receiver_id").notNull().references(() => users.id, { onDelete: "cascade" }),

@@ -160,7 +160,12 @@ export class MemStorage implements IStorage {
   async createFriendRequest(requestData: InsertFriend): Promise<Friend> {
     const id = this.friendIdCounter++;
     const now = new Date();
-    const friendRequest: Friend = { ...requestData, id, requestTime: now };
+    const friendRequest: Friend = { 
+      ...requestData, 
+      id, 
+      requestTime: now, 
+      status: requestData.status ?? "pending" 
+    };
     this.friends.set(id, friendRequest);
     return friendRequest;
   }
@@ -286,4 +291,6 @@ export class MemStorage implements IStorage {
 
 // Use the simple in-memory storage for now
 // This ensures data persistence while the application is running
-export const storage = new MemStorage();
+//export const storage = new MemStorage();
+import { DatabaseStorage } from './database-storage';
+export const storage = new DatabaseStorage();

@@ -23,6 +23,13 @@ export default defineConfig({
       "@assets": path.resolve(import.meta.dirname, "attached_assets"),
     },
   },
+  server: {
+    port: 5000,
+    strictPort: true,
+    hmr: {
+      port: 5000,
+    },
+  },
   root: path.resolve(import.meta.dirname, "client"),
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),

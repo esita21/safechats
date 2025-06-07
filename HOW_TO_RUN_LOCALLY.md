@@ -1,4 +1,4 @@
-# How to Run KidChat on Your Computer
++# How to Run KidChat on Your Computer
 
 Follow these steps to download and run KidChat on your own computer.
 
@@ -8,6 +8,7 @@ Follow these steps to download and run KidChat on your own computer.
 - [npm](https://www.npmjs.com/) (comes with Node.js)
 - [Git](https://git-scm.com/) (optional, for cloning the repository)
 
+ 
 ## Step 1: Download the Code
 
 ### Option 1: Download as ZIP file

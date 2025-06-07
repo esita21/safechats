@@ -50,7 +50,7 @@ export default function Login() {
       }
       
       const user = await response.json();
-      
+      console.log('Logged in user:', user);
       // Check if they're trying to log in with the correct account type
       if (isParentLogin && !user.isParent) {
         throw new Error('This is a parent login. Please log in as a child on the child tab.');

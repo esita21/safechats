@@ -50,7 +50,7 @@ export default function FriendRequests() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          friendRequestId: requestId,
+          friendRequestId: Number(requestId),
           status
         })
       });

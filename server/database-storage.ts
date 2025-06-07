@@ -11,16 +11,36 @@ import {
 export class DatabaseStorage implements IStorage {
   // User operations
   async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
+    const result = await db.select().from(users).where(eq(users.id, id));
+    const user = Array.isArray(result) ? result[0] : undefined;
     return user;
   }
 
+  // async getUserByUsername(username: string): Promise<User | undefined> {
+  //   const [user] = await db.select().from(users).where(eq(users.username, username));
+  //   let newUser= user;
+  //   newUser.id = Number(user.id);
+    
+  //   return newUser;
+  // }
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user;
+  const [user] = await db.select().from(users).where(eq(users.username, username));
+
+  if (!user) {
+    // No user found with the given username
+    return undefined;
   }
+
+  // Just to be safe, if id might be a string from the DB
+  return {
+    ...user,
+    id: Number(user.id),
+  };
+}
+
 
   async createUser(userData: InsertUser): Promise<User> {
+    console.log("Creating user with data:", userData);
     const [user] = await db
       .insert(users)
       .values(userData)
@@ -93,7 +113,7 @@ export class DatabaseStorage implements IStorage {
     // Get all children for this parent
     const children = await this.getChildrenByParentId(parentId);
     const childIds = children.map(child => child.id);
-    
+    console.log("Child IDs for pending reviews:", childIds);
     if (childIds.length === 0) return [];
     
     // Get all messages that need review (either filtered or not reviewed yet)
@@ -102,7 +122,7 @@ export class DatabaseStorage implements IStorage {
       .from(messages)
       .where(
         and(
-          or(
+          or(  
             eq(messages.isFiltered, true),
             eq(messages.isReviewed, false)
           ),

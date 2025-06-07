@@ -11,7 +11,8 @@ interface MessageContextType {
   setSelectedChat: (userId: number | null) => void;
 }
 
-const MessageContext = createContext<MessageContextType>({
+const 
+MessageContext = createContext<MessageContextType>({
   sendMessage: () => {},
   messages: new Map(),
   onlineFriends: new Set(),
@@ -36,11 +37,15 @@ export function MessageProvider({ children }: MessageProviderProps) {
     
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
+    console.log('Connecting to WebSocket:', wsUrl);
     const ws = new WebSocket(wsUrl);
-    
+    console.log('WebSocket created:', ws);
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
     ws.onopen = () => {
       // Authenticate with the server
-      ws.send(JSON.stringify({ type: 'auth', userId: user.id }));
+      ws.send(JSON.stringify({ type: 'auth', userId: Number(user.id) }));
     };
     
     ws.onmessage = (event) => {
@@ -50,14 +55,15 @@ export function MessageProvider({ children }: MessageProviderProps) {
         if (data.type === 'message' || data.type === 'message_sent') {
           // Handle received or sent messages
           const message = data.message;
-          
+          console.log('Received message:', message);
           setMessages(prevMessages => {
             const newMessages = new Map(prevMessages);
-            const partnerId = message.senderId === user.id ? message.receiverId : message.senderId;
+            console.log(message,user);
+            const partnerId = message.senderId == user.id ? message.receiverId : message.senderId;
             
             const existingMessages = newMessages.get(partnerId) || [];
             newMessages.set(partnerId, [...existingMessages, message]);
-            
+            console.log('Updated messages for partner:', partnerId, newMessages);
             return newMessages;
           });
         } else if (data.type === 'status') {
@@ -114,13 +120,14 @@ export function MessageProvider({ children }: MessageProviderProps) {
   
   const sendMessage = (receiverId: number, content: string) => {
     if (!socket || !user) return;
-    
+    console.log('Sending message:', content, 'to', receiverId);
     // Filter message content for profanity
     const { filtered, containsProfanity } = filterMessageForProfanity(content);
     
     socket.send(JSON.stringify({
       type: 'message',
-      receiverId,
+      receiverId : Number(receiverId),
+
       content: filtered,
       isFiltered: containsProfanity
     }));

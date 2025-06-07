@@ -65,7 +65,7 @@ export default function MessageReview() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          messageId,
+          messageId :Number(messageId),
           isReviewed: true,
           action
         })

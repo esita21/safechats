@@ -65,6 +65,10 @@ export default function ChildAccounts() {
     
     try {
       setError(null);
+      console.log('Creating child account with data:',  JSON.stringify({
+          ...data,
+          parentId: user.id
+        }));
       const response = await fetch('/api/children', {
         method: 'POST',
         headers: {
@@ -72,7 +76,7 @@ export default function ChildAccounts() {
         },
         body: JSON.stringify({
           ...data,
-          parentId: user.id
+          parentId: Number(user.id)
         })
       });
       

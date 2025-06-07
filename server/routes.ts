@@ -8,6 +8,9 @@ import {
   friendRequestResponseSchema, messageReviewSchema
 } from "@shared/schema";
 import { addPreSavedFriendsForChild } from "./preSavedFriends";
+import { c } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
+import { is } from "drizzle-orm";
+import { isDataView } from "util/types";
 
 // Keep track of active connections
 const activeConnections = new Map<number, WebSocket>();
@@ -27,11 +30,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup WebSocket server for chat
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
-  
+  wss.on('error', (error) => {
+    console.error('WebSocket server error:', error);
+  });
+  wss.on('listening', () => {
+    console.log('WebSocket server is listening');
+  });
   wss.on('connection', (ws) => {
     let userId: number | null = null;
+    console.log('New WebSocket connection established');
     
     ws.on('message', async (message) => {
+      console.log('Received WebSocket message:', message.toString());
       try {
         const data = JSON.parse(message.toString());
         
@@ -52,18 +62,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }));
             }
           });
+
+        
         } else if (data.type === 'message' && userId) {
+          console.log('Handling message from user:', userId);
           // Handle message sending
           const { valid, data: validData, error } = validateApiRequest(
             insertMessageSchema, 
-            { senderId: userId, receiverId: data.receiverId, content: data.content }
+            { senderId: userId, receiverId: data.receiverId, content: data.content ,isFiltered: data.isFiltered || false, isReviewed: !data.isFiltered || true ,isDeleted: data.isDeleted || false }
           );
           
           if (!valid) {
+            console.log('Invalid message data:', error);
             ws.send(JSON.stringify({ type: 'error', error }));
             return;
           }
-          
+          console.log('Valid message data:', validData);
           // Store the message
           const message = await storage.createMessage(validData);
           
@@ -75,12 +89,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               message
             }));
           }
-          
+          console.log('Message sent to recipient:', data.receiverId);
           // Confirm receipt to sender
           ws.send(JSON.stringify({
             type: 'message_sent',
             message
           }));
+          console.log('Message sent confirmation to sender:', userId);
         }
       } catch (error) {
         console.error('WebSocket message error:', error);
@@ -122,7 +137,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     // Don't send password in response
     const { password, ...userWithoutPassword } = user;
-    
+    console.log('User logged in:', user,valid);
     res.json(userWithoutPassword);
   });
   
@@ -162,7 +177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     // Create child account
     const newChild = await storage.createUser({
-      ...data,
+      ...(typeof data === 'object' && data !== null ? data : {}),
       isParent: false
     });
     
@@ -230,6 +245,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     const messages = await storage.getPendingMessageReviews(parentId);
+    console.log("Pending message reviews for parent:", parentId, messages);
     res.json(messages);
   });
   
@@ -267,7 +283,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     // Verify that the child belongs to this parent
     const children = await storage.getChildrenByParentId(parentId);
-    const childBelongsToParent = children.some(child => child.id === childId);
+    const childBelongsToParent = children.some(child => child.id == childId);
     
     if (!childBelongsToParent) {
       return res.status(403).json({ message: 'Child does not belong to this parent' });
@@ -283,8 +299,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!valid) return res.status(400).json({ message: error });
     
     // Check if users exist
-    const user = await storage.getUser(data.userId);
-    const friend = await storage.getUser(data.friendId);
+    const typedData = data as { userId: number; friendId: number };
+    const user = await storage.getUser(typedData.userId);
+    const friend = await storage.getUser(typedData.friendId);
     
     if (!user || !friend) {
       return res.status(404).json({ message: 'User not found' });
@@ -296,11 +313,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     // Check if request already exists
-    const existingRequests = await storage.getFriendRequestsByUser(data.userId);
+    //const typedData = data as { userId: number; friendId: number };
+    const existingRequests = await storage.getFriendRequestsByUser(typedData.userId);
     const alreadyRequested = existingRequests.some(
       req => 
-        (req.userId === data.userId && req.friendId === data.friendId) || 
-        (req.userId === data.friendId && req.friendId === data.userId)
+        (req.userId === typedData.userId && req.friendId === typedData.friendId) || 
+        (req.userId === typedData.friendId && req.friendId === typedData.userId)
     );
     
     if (alreadyRequested) {
@@ -308,7 +326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     // Create friend request
-    const friendRequest = await storage.createFriendRequest(data);
+    const friendRequest = await storage.createFriendRequest(typedData);
     
     // Notify parent of the request recipient
     if (friend.parentId) {
@@ -382,7 +400,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       user: userWithoutPassword
     });
   });
-  
+  app.get('/api/users/:userId', async (req: Request, res: Response) => {
+    const userId = parseInt(req.params.userId);
+    if (isNaN(userId)) {
+      return res.status(400).json({ message: 'Invalid user ID' });
+    }
+    
+    const user = await storage.getUser(userId);
+     if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+   const { password, ...userWithoutPassword } = user;
+    res.json(userWithoutPassword);
+  });
   app.get('/api/users/:userId/friends', async (req: Request, res: Response) => {
     const userId = parseInt(req.params.userId);
     if (isNaN(userId)) {
@@ -390,9 +420,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     const friends = await storage.getFriendsByUserId(userId);
-    
+    const newFriends = friends.map(friend => {
+      let newFriend = { ...friend };
+      newFriend.id= Number(newFriend.id);
+      return newFriend;
+    });
     // Remove passwords from response
-    const friendsWithoutPasswords = friends.map(({ password, ...friend }) => friend);
+    const friendsWithoutPasswords = newFriends.map(({ password, ...friend }) => friend);
     
     res.json(friendsWithoutPasswords);
   });
@@ -430,6 +464,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     const { valid, data, error } = validateApiRequest(friendRequestResponseSchema, req.body);
     if (!valid) return res.status(400).json({ message: error });
+    const typedData = data as { status: string };
     
     const friendRequest = await storage.getFriendRequest(requestId);
     if (!friendRequest) {
@@ -437,7 +472,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     // Update friend request status
-    const updatedRequest = await storage.updateFriendRequest(requestId, { status: data.status });
+    const updatedRequest = await storage.updateFriendRequest(requestId, { status: typedData.status });
     
     // Create notifications for both users
     const requester = await storage.getUser(friendRequest.userId);
@@ -447,12 +482,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Notify the requester about the decision
       await storage.createNotification({
         userId: requester.id,
-        message: `Your friend request to ${recipient.name} was ${data.status}`,
+        message: `Your friend request to ${recipient.name} was ${typedData.status}`,
         isRead: false
       });
       
       // Notify the recipient about the new friend if approved
-      if (data.status === 'approved') {
+      if (typedData.status === 'approved') {
         await storage.createNotification({
           userId: recipient.id,
           message: `You are now friends with ${requester.name}`,
@@ -487,6 +522,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     res.json(notification);
+  });
+  app.get('/api/users/by-username/:username', async (req: Request, res: Response) => {
+    const username = req.params.username;
+    if (!username) {
+      return res.status(400).json({ message: 'Username is required' });
+    }
+    const user = await storage.getUserByUsername(username);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    // Don't send password in response
+    const { password, ...userWithoutPassword } = user;
+    res.json(userWithoutPassword);
   });
 
   return httpServer;

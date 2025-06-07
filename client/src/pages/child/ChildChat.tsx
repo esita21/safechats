@@ -50,7 +50,8 @@ export default function ChildChat() {
   
   const handleSendMessage = () => {
     if (!messageText.trim() || !selectedChat) return;
-    
+    console.log('Sending message:', messageText);
+    // Filter message for profanity if needed
     sendMessage(selectedChat, messageText);
     setMessageText('');
   };
@@ -111,7 +112,7 @@ export default function ChildChat() {
                 <ChatBox
                   key={message.id}
                   message={message}
-                  isSentByMe={message.senderId === user.id}
+                  isSentByMe={message.senderId == user.id}
                 />
               ))}
               <div ref={endOfMessagesRef} />
