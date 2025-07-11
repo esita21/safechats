@@ -23,7 +23,9 @@ export const  messages = pgTable("messages", {
   timestamp: timestamp("timestamp").notNull().defaultNow(),
   isDeleted: boolean("is_deleted").default(false),
   isFiltered: boolean("is_filtered").default(false), // Marked if contains inappropriate language
-  isReviewed: boolean("is_reviewed").default(false) // Marked if parent has reviewed
+  isReviewed: boolean("is_reviewed").default(false),
+   senderName: text("sender_name").notNull(), // For display purposes
+  receiverName: text("receiver_name").notNull(), // For display purposes
 });
 
 // Friend connections

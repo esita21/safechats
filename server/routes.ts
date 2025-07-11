@@ -69,7 +69,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Handle message sending
           const { valid, data: validData, error } = validateApiRequest(
             insertMessageSchema, 
-            { senderId: userId, receiverId: data.receiverId, content: data.content ,isFiltered: data.isFiltered || false, isReviewed: !data.isFiltered || true ,isDeleted: data.isDeleted || false }
+            { senderId: userId, receiverId: data.receiverId, content: data.content ,isFiltered: data.isFiltered || false, isReviewed: !data.isFiltered || true ,isDeleted: data.isDeleted || false ,senderName: data.senderName, receiverName: data.receiverName }
           );
           
           if (!valid) {

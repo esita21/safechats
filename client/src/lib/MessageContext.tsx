@@ -4,7 +4,7 @@ import { useAuth } from './auth';
 import { filterMessageForProfanity } from './wordFilter';
 
 interface MessageContextType {
-  sendMessage: (receiverId: number, content: string) => void;
+  sendMessage: (receiverId: number, content: string,receiver:string) => void;
   messages: Map<number, Message[]>; // Messages grouped by conversation partner
   onlineFriends: Set<number>; // IDs of online friends
   selectedChat: number | null; // ID of currently selected chat
@@ -118,7 +118,7 @@ export function MessageProvider({ children }: MessageProviderProps) {
     loadMessages();
   }, [user]);
   
-  const sendMessage = (receiverId: number, content: string) => {
+  const sendMessage = (receiverId: number, content: string,receiver: string) => {
     if (!socket || !user) return;
     console.log('Sending message:', content, 'to', receiverId);
     // Filter message content for profanity
@@ -127,7 +127,8 @@ export function MessageProvider({ children }: MessageProviderProps) {
     socket.send(JSON.stringify({
       type: 'message',
       receiverId : Number(receiverId),
-
+      senderName: user.name,
+      receiverName: receiver, // This will be set by the server based on the receiverId
       content: filtered,
       isFiltered: containsProfanity
     }));

@@ -36,7 +36,7 @@ export default function MessageItem({ message, onReview, isParentView = false }:
         <div>
           <div className="flex items-center">
             <span className="font-medium">
-              {isParentView ? `From Child #${message.senderId} to Child #${message.receiverId}` : 'Message'}
+              {isParentView ? `From Child #${message.senderName} to Child #${message.receiverName}` : 'Message'}
             </span>
             {isFlagged && (
               <span className="flex items-center text-amber-600 text-xs ml-2">

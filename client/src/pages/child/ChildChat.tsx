@@ -52,7 +52,7 @@ export default function ChildChat() {
     if (!messageText.trim() || !selectedChat) return;
     console.log('Sending message:', messageText);
     // Filter message for profanity if needed
-    sendMessage(selectedChat, messageText);
+    sendMessage(selectedChat, messageText , friend?.name || 'Unknown');
     setMessageText('');
   };
   
